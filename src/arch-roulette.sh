@@ -32,6 +32,7 @@ show_help() {
     echo "  game of system modification. Use with caution!"
     echo ""
     echo "Usage: arch-roulette [options]"
+    echo "       arch-roulette play [options]  # To play the game"
     echo ""
     echo "Options:"
     echo "  -h, --help      Show this help message and exit"
@@ -40,10 +41,17 @@ show_help() {
     echo "  -H, --hardcore  Use paru (includes AUR packages)"
     echo ""
     echo "Example:"
-    echo "  arch-roulette --dry-run    # See what would happen"
-    echo "  arch-roulette --safe-mode   # Ask before changes"
-    echo "  arch-roulette --hardcore    # Include AUR packages"
+    echo "  arch-roulette                    # Show help"
+    echo "  arch-roulette play --dry-run     # See what would happen"
+    echo "  arch-roulette play --safe-mode   # Ask before changes"
+    echo "  arch-roulette play --hardcore    # Include AUR packages"
 }
+
+# Show the help message if no arguments are passed
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
 
 # Function to initialize logging
 init_logging() {
@@ -86,9 +94,16 @@ remove_package() {
     log_action "Removal completed for '$package'"
 }
 
+# Are we playing?
+PLAY_MODE="false"
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        play)
+            PLAY_MODE="true"
+            shift
+            ;;
         -h|--help)
             show_help
             exit 0
@@ -112,6 +127,13 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Stop if we're not playing
+if [ "$PLAY_MODE" = "false" ]; then
+    echo "Error: The 'play' flag is required to run the game"
+    echo "Usage: arch-roulette play [options]"
+    exit 1
+fi
 
 # Main program flow
 if ! command -v $PACKAGE_MANAGER &>/dev/null; then
